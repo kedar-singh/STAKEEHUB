@@ -27,7 +27,7 @@ export default function Home() {
                 RUSD Faucet
               </h1>
               <p className="font-funnel-display text-lg md:text-xl text-gray-500">
-                Get test RUSD tokens from the faucet.
+                Get test RUSD tokens from the faucet for OnlySwaps Portal
               </p>
             </div>
           </div>
@@ -38,13 +38,13 @@ export default function Home() {
           <div className="flex flex-col md:flex-row items-center justify-between border-t border-gray-200 pt-6 md:pt-8 gap-4 md:gap-0">
             <div className="flex items-center gap-2">
               <span className="ffont-funnel-display text-gray-900">
-                Try out the Demos
+                Mint RUSD Tokens
               </span>
             </div>
             <div className="flex flex-col md:flex-row gap-2 md:gap-0 w-full md:w-auto">
-              <Link href="/blocklock" className="w-full md:w-[200px]">
+              <Link href="/faucet" className="w-full md:w-[200px]">
                 <div className="w-full md:w-[200px] py-3 text-gray-900 border border-gray-200 hover:border-gray-400 transition-colors text-center font-funnel-display">
-                  Text Encrypt
+                  Get Faucet
                 </div>
               </Link>
             </div>
