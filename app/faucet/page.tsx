@@ -71,7 +71,7 @@ export default function Faucet() {
                                 RUSD Faucet
                             </h1>
                             <p className="font-funnel-display text-lg md:text-xl text-gray-500">
-                                Connect your wallet, select a network, and mint test RUSD.
+                                Connect your wallet, select a network, and mint RUSD tokens
                             </p>
                         </div>
 
