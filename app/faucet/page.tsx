@@ -27,12 +27,15 @@ export default function Faucet() {
         const faucetAddress = CONTRACT_ADDRESS;
         try {
             setIsMinting(true);
-            const anyWindow = window as any;
-            const provider = new ethers.BrowserProvider(anyWindow.ethereum);
+            const ethProvider = (window as Window & { ethereum?: ethers.Eip1193Provider }).ethereum;
+            if (!ethProvider) {
+                throw new Error("No EIP-1193 provider found");
+            }
+            const provider = new ethers.BrowserProvider(ethProvider);
             const signer = await provider.getSigner();
             const contract = new ethers.Contract(
                 faucetAddress,
-                CONTRACT_ABI as any,
+                CONTRACT_ABI as ethers.InterfaceAbi,
                 signer
             );
             const tx = await contract.mint();
