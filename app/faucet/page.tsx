@@ -8,6 +8,7 @@ import { base, baseSepolia, avalanche, avalancheFuji } from "wagmi/chains";
 import { useMemo, useState, useEffect, useRef, useCallback } from "react";
 import { ethers } from "ethers";
 import { CONTRACT_ABI, CONTRACT_ADDRESS } from "@/lib/contract";
+import { useEthersProvider, useEthersSigner } from "@/hooks/useEthers";
 
 type FaucetChain = typeof base | typeof baseSepolia | typeof avalanche | typeof avalancheFuji;
 
@@ -19,20 +20,24 @@ export default function Faucet() {
     const { switchChain, isPending: isSwitching } = useSwitchChain();
     const [selectedId, setSelectedId] = useState<number>(baseSepolia.id);
     const [isMinting, setIsMinting] = useState(false);
+  const [mintError, setMintError] = useState<string | null>(null);
     const selectedChain = useMemo(() => SUPPORTED_CHAINS.find((c) => c.id === selectedId)!, [selectedId]);
     const isMatching = connectedChainId === selectedId;
+
+  const signer = useEthersSigner();
+  const provider = useEthersProvider();
 
     const handleMint = useCallback(async () => {
         if (!isConnected || !isMatching) return;
         const faucetAddress = CONTRACT_ADDRESS;
         try {
             setIsMinting(true);
-            const ethProvider = (window as Window & { ethereum?: ethers.Eip1193Provider }).ethereum;
-            if (!ethProvider) {
-                throw new Error("No EIP-1193 provider found");
+      setMintError(null);
+            
+            if (!provider || !signer) {
+                throw new Error("Please connect your wallet");
             }
-            const provider = new ethers.BrowserProvider(ethProvider);
-            const signer = await provider.getSigner();
+
             const contract = new ethers.Contract(
                 faucetAddress,
                 CONTRACT_ABI as ethers.InterfaceAbi,
@@ -40,12 +45,14 @@ export default function Faucet() {
             );
             const tx = await contract.mint();
             await tx.wait();
-        } catch (e) {
-            console.error(e);
-        } finally {
+    } catch (e) {
+      const err = e as unknown as { reason?: string; shortMessage?: string; message?: string };
+      const reason = err?.reason || err?.shortMessage || err?.message || "Transaction failed";
+      setMintError(reason);
+    } finally {
             setIsMinting(false);
         }
-    }, [isConnected, isMatching]);
+  }, [isConnected, isMatching, provider, signer]);
 
     return (
         <div className="min-h-screen bg-white-pattern">
@@ -98,7 +105,8 @@ export default function Faucet() {
                                         {isSwitching ? "Switching..." : `Switch to ${selectedChain.name}`}
                                     </button>
                                 )}
-                                {/* Mint Button */}
+                                {/* Mint Button */
+                                }
                                 <button
                                     disabled={!isConnected || !isMatching}
                                     className="h-12 font-funnel-display text-gray-900 items-center inline-flex bg-white border border-gray-200 hover:border-gray-400 transition-colors justify-center text-center px-8 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -106,6 +114,11 @@ export default function Faucet() {
                                 >
                                     {isConnected ? (isMatching ? (isMinting ? "Minting..." : "Mint Faucet") : "Connect to selected network") : "Connect Wallet First"}
                                 </button>
+                                {mintError && (
+                                  <p className="font-funnel-display text-sm text-red-600">
+                                    {mintError}
+                                  </p>
+                                )}
                             </div>
                         </div>
                     </div>
